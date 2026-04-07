@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0%" stop-color="#0e4076"/><stop offset="100%" stop-color="#1b8cc5"/></linearGradient></defs>
+  <rect width="800" height="450" rx="40" fill="url(#bg)"/>
+  <rect x="80" y="80" width="240" height="120" rx="24" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.22)"/>
+  <text x="200" y="125" text-anchor="middle" fill="#fff" font-size="38" font-family="Arial">Suất điện động</text>
+  <text x="200" y="170" text-anchor="middle" fill="#fff8c8" font-size="54" font-family="Arial" font-weight="700">E = A / q</text>
+  <g transform="translate(470 90)">
+    <line x1="0" y1="60" x2="180" y2="60" stroke="#d9f4ff" stroke-width="8"/>
+    <line x1="76" y1="22" x2="76" y2="98" stroke="#fff0a0" stroke-width="10"/>
+    <line x1="106" y1="34" x2="106" y2="86" stroke="#fff0a0" stroke-width="10"/>
+    <text x="60" y="24" fill="#fff" font-size="34">+</text>
+    <text x="117" y="24" fill="#fff" font-size="34">-</text>
+  </g>
+  <text x="400" y="390" text-anchor="middle" fill="#edf8ff" font-size="30" font-family="Arial">Nguồn điện đặc trưng cho khả năng thực hiện công trên một điện tích</text>
+</svg>

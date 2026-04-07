@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0%" stop-color="#184a84"/><stop offset="100%" stop-color="#6d7be0"/></linearGradient></defs>
+  <rect width="800" height="450" rx="40" fill="url(#bg)"/>
+  <rect x="90" y="132" width="180" height="120" rx="24" fill="#7fd15e" stroke="#e9ffd2" stroke-width="4"/>
+  <text x="180" y="194" text-anchor="middle" fill="#fff" font-size="46" font-family="Arial" font-weight="700">Ắc quy</text>
+  <line x1="270" y1="192" x2="420" y2="192" stroke="#e8f8ff" stroke-width="8"/>
+  <rect x="420" y="156" width="200" height="72" rx="18" fill="#ffd56b"/>
+  <text x="520" y="201" text-anchor="middle" fill="#143757" font-size="34" font-family="Arial" font-weight="700">Biến trở</text>
+  <text x="400" y="332" text-anchor="middle" fill="#fff7bf" font-size="48" font-family="Arial" font-weight="700">R₁R₂ = r²</text>
+  <text x="400" y="386" text-anchor="middle" fill="#edf8ff" font-size="28" font-family="Arial">Với hai giá trị R cho cùng công suất, điện trở trong suy ra từ tích R₁R₂</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0%" stop-color="#1f5e8b"/><stop offset="100%" stop-color="#2b9cc0"/></linearGradient></defs>
+  <rect width="800" height="450" rx="40" fill="url(#bg)"/>
+  <rect x="110" y="120" width="220" height="170" rx="28" fill="#3d4a54"/>
+  <circle cx="220" cy="205" r="54" fill="#f28428" opacity=".92"/>
+  <rect x="400" y="100" width="250" height="190" rx="26" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.25)"/>
+  <text x="525" y="155" text-anchor="middle" fill="#fff" font-size="34" font-family="Arial">Công tơ điện</text>
+  <text x="525" y="220" text-anchor="middle" fill="#fff7bf" font-size="54" font-family="Arial" font-weight="700">+ 3 kWh</text>
+  <text x="400" y="380" text-anchor="middle" fill="#edf8ff" font-size="30" font-family="Arial">Từ điện năng tiêu thụ suy ra công suất và cường độ dòng điện</text>
+</svg>

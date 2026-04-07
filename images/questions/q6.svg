@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0%" stop-color="#15497d"/><stop offset="100%" stop-color="#2e7cb7"/></linearGradient></defs>
+  <rect width="800" height="450" rx="40" fill="url(#bg)"/>
+  <text x="400" y="72" text-anchor="middle" fill="#ffffff" font-size="36" font-family="Arial">Hai điện trở nối tiếp</text>
+  <line x1="90" y1="220" x2="230" y2="220" stroke="#dff6ff" stroke-width="8"/>
+  <rect x="230" y="185" width="130" height="70" rx="16" fill="#ffd56b"/>
+  <text x="295" y="230" text-anchor="middle" fill="#143757" font-size="34" font-family="Arial" font-weight="700">R1</text>
+  <line x1="360" y1="220" x2="450" y2="220" stroke="#dff6ff" stroke-width="8"/>
+  <rect x="450" y="185" width="130" height="70" rx="16" fill="#ffd56b"/>
+  <text x="515" y="230" text-anchor="middle" fill="#143757" font-size="34" font-family="Arial" font-weight="700">R2</text>
+  <line x1="580" y1="220" x2="710" y2="220" stroke="#dff6ff" stroke-width="8"/>
+  <path d="M95 160h60" stroke="#fff" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="125" y="145" text-anchor="middle" fill="#fff" font-size="30" font-family="Arial">I</text>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#fff"/></marker></defs>
+  <text x="400" y="360" text-anchor="middle" fill="#edf8ff" font-size="30" font-family="Arial">Vì I như nhau nên nhiệt lượng tỏa ra tỉ lệ thuận với R</text>
+</svg>
