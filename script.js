@@ -1,7 +1,7 @@
 const POINTS_PER_CORRECT = 10;
 const MAX_HEALTH = 3;
 const QUESTION_BIRDS = 10;
-const MAX_BUFF_ON_SCREEN = 2; // Luôn duy trì 2 chim Buff
+const MAX_BUFF_ON_SCREEN = 2; 
 
 const MAX_ARROW_SPEED = 920;
 const ARROW_GRAVITY = 420;
@@ -189,7 +189,6 @@ const state = {
   rafId: 0
 };
 
-// DOM Elements
 const screens = {
   start: document.getElementById("startScreen"),
   game: document.getElementById("gameScreen"),
@@ -230,8 +229,6 @@ const finalBuff = document.getElementById("finalBuff");
 
 const optionLetters = ["A", "B", "C", "D"];
 
-// --- Logic Helpers ---
-
 function shuffle(arr) {
   const clone = [...arr];
   for (let i = clone.length - 1; i > 0; i -= 1) {
@@ -248,10 +245,12 @@ function showScreen(key) {
 
 function openModal(modal) {
   modal.classList.remove("hidden");
+  modal.style.pointerEvents = "auto";
 }
 
 function closeModal(modal) {
   modal.classList.add("hidden");
+  modal.style.pointerEvents = "none";
 }
 
 function getBowOrigin() {
@@ -374,7 +373,7 @@ function resetGame() {
   state.questionOpen = false;
   state.lastTime = 0;
   arrowsLayer.innerHTML = "";
-  questionFeedback.className = "question-feedback hidden";
+  questionFeedback.classList.add("hidden"); 
   closeModal(questionModal);
   state.stageRect = stage.getBoundingClientRect();
   createBirds();
@@ -466,34 +465,22 @@ function handlePointerMove(event) {
 
 function handlePointerUp(event) {
   if (!state.isAiming) return;
-  const rect = stage.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
   state.isAiming = false;
   setAimVisible(false);
-  createArrow(x, y);
+  createArrow(state.pointerX, state.pointerY);
 }
 
-// --- ĐOẠN FIX NẰM Ở ĐÂY ---
 function updateBirds(delta, timeSeconds) {
   const rect = state.stageRect;
   state.birds.forEach((bird) => {
     if (bird.hit) return;
-    
-    // Di chuyển
     bird.x += bird.vx * delta;
     bird.baseY += bird.vy * delta;
-    
     if (bird.x < 12 || bird.x > rect.width - bird.size - 12) bird.vx *= -1;
     if (bird.baseY < 18 || bird.baseY > rect.height * 0.58 - bird.size) bird.vy *= -1;
-    
     bird.y = bird.baseY + Math.sin(timeSeconds * bird.phaseSpeed + bird.phase) * bird.amp;
     bird.facing = bird.vx >= 0 ? 1 : -1;
-
-    // CHỈ CẬP NHẬT TỌA ĐỘ CHO THẺ CHA (Không dùng scaleX ở đây)
     bird.el.style.transform = `translate(${bird.x}px, ${bird.y}px)`;
-    
-    // CHỈ LẬT HÌNH ẢNH CON (Hướng chim thay đổi, text/badge vẫn đúng chiều)
     const birdImg = bird.el.querySelector("img");
     if (birdImg) {
       birdImg.style.transform = `scaleX(${bird.facing})`;
@@ -571,6 +558,9 @@ function loop(timestamp) {
 function openQuestion(questionIndex) {
   state.isPaused = true;
   state.questionOpen = true;
+  
+  questionFeedback.classList.add("hidden"); 
+
   const q = questions[questionIndex];
   questionMeta.textContent = `${q.level} · ${q.topic}`;
   questionTitle.textContent = `Câu ${state.answeredCount + 1}`;
@@ -618,6 +608,7 @@ function answerQuestion(questionIndex, selectedIndex) {
 }
 
 function continueAfterQuestion() {
+  questionFeedback.classList.add("hidden"); 
   closeModal(questionModal);
   state.questionOpen = false;
   state.isPaused = false;
@@ -628,7 +619,6 @@ function continueAfterQuestion() {
     return;
   }
 
-  // Hồi sinh Buff
   const currentBuffs = state.birds.filter(b => b.type === "buff" && !b.hit).length;
   if (currentBuffs < MAX_BUFF_ON_SCREEN) {
     const need = MAX_BUFF_ON_SCREEN - currentBuffs;
@@ -650,12 +640,32 @@ function resizeStage() {
   if (stage) state.stageRect = stage.getBoundingClientRect();
 }
 
-// Event Listeners
 stage.addEventListener("pointerdown", handlePointerDown);
 stage.addEventListener("pointermove", handlePointerMove);
 stage.addEventListener("pointerup", handlePointerUp);
+
 document.getElementById("startNowBtn").onclick = startGame;
 continueBtn.onclick = continueAfterQuestion;
-window.onresize = resizeStage;
 
+document.getElementById("restartBtn").onclick = () => {
+  showScreen("game");
+  startGame();
+};
+
+document.getElementById("homeBtn").onclick = () => {
+  showScreen("start");
+  state.isRunning = false;
+};
+
+document.getElementById("helpBtn").onclick = () => {
+  openModal(guideModal);
+  state.isPaused = true;
+};
+
+document.getElementById("closeGuideBtn").onclick = () => {
+  closeModal(guideModal);
+  if (!state.questionOpen) state.isPaused = false;
+};
+
+window.onresize = resizeStage;
 showScreen("start");
