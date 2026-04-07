@@ -189,7 +189,7 @@ const state = {
   rafId: 0
 };
 
-// DOM Elements (Giả định các ID này đã có trong HTML của bạn)
+// DOM Elements
 const screens = {
   start: document.getElementById("startScreen"),
   game: document.getElementById("gameScreen"),
@@ -474,17 +474,30 @@ function handlePointerUp(event) {
   createArrow(x, y);
 }
 
+// --- ĐOẠN FIX NẰM Ở ĐÂY ---
 function updateBirds(delta, timeSeconds) {
   const rect = state.stageRect;
   state.birds.forEach((bird) => {
     if (bird.hit) return;
+    
+    // Di chuyển
     bird.x += bird.vx * delta;
     bird.baseY += bird.vy * delta;
+    
     if (bird.x < 12 || bird.x > rect.width - bird.size - 12) bird.vx *= -1;
     if (bird.baseY < 18 || bird.baseY > rect.height * 0.58 - bird.size) bird.vy *= -1;
+    
     bird.y = bird.baseY + Math.sin(timeSeconds * bird.phaseSpeed + bird.phase) * bird.amp;
     bird.facing = bird.vx >= 0 ? 1 : -1;
-    bird.el.style.transform = `translate(${bird.x}px, ${bird.y}px) scaleX(${bird.facing})`;
+
+    // CHỈ CẬP NHẬT TỌA ĐỘ CHO THẺ CHA (Không dùng scaleX ở đây)
+    bird.el.style.transform = `translate(${bird.x}px, ${bird.y}px)`;
+    
+    // CHỈ LẬT HÌNH ẢNH CON (Hướng chim thay đổi, text/badge vẫn đúng chiều)
+    const birdImg = bird.el.querySelector("img");
+    if (birdImg) {
+      birdImg.style.transform = `scaleX(${bird.facing})`;
+    }
   });
 }
 
@@ -615,7 +628,7 @@ function continueAfterQuestion() {
     return;
   }
 
-  // --- LOGIC HỒI SINH BUFF ---
+  // Hồi sinh Buff
   const currentBuffs = state.birds.filter(b => b.type === "buff" && !b.hit).length;
   if (currentBuffs < MAX_BUFF_ON_SCREEN) {
     const need = MAX_BUFF_ON_SCREEN - currentBuffs;
