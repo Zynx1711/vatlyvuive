@@ -328,7 +328,46 @@ function createBirds() {
     buildBirdElement(bird);
     state.birds.push(bird);
   });
+function spawnOneBuff() {
+  const stageRect = state.stageRect;
+  const skyMinY = 24;
+  const skyMaxY = Math.max(120, stageRect.height * 0.55);
 
+  const buff = safeBuffPool[Math.floor(Math.random() * safeBuffPool.length)];
+
+  const bird = {
+    id: `b-${buff.key}-${Date.now()}`,
+    type: "buff",
+    buffKey: buff.key,
+    badge: buff.badge,
+    hit: false,
+    x: 80 + Math.random() * (stageRect.width - 160),
+    baseY: skyMinY + Math.random() * (skyMaxY - skyMinY),
+    y: 0,
+    vx: (Math.random() > 0.5 ? 1 : -1) * (32 + Math.random() * 24),
+    vy: (Math.random() > 0.5 ? 1 : -1) * (6 + Math.random() * 12),
+    amp: 14 + Math.random() * 16,
+    phase: Math.random() * Math.PI * 2,
+    phaseSpeed: 1.1 + Math.random() * 1.3,
+    size: BUFF_BIRD_SIZE - Math.random() * 7,
+    facing: 1
+  };
+
+  buildBirdElement(bird);
+  state.birds.push(bird);
+}
+
+function ensureBuffCount() {
+  const currentBuffs = state.birds.filter(
+    b => b.type === "buff" && !b.hit
+  ).length;
+
+  const need = BUFF_BIRDS - currentBuffs;
+
+  for (let i = 0; i < need; i++) {
+    spawnOneBuff();
+  }
+}
   const chosenBuffs = shuffle(safeBuffPool).slice(0, BUFF_BIRDS);
   state.buffConfigs = chosenBuffs;
   chosenBuffs.forEach((buff, index) => {
@@ -730,43 +769,3 @@ window.addEventListener("resize", resizeStage);
 window.addEventListener("orientationchange", resizeStage);
 
 showScreen("start");
-function spawnOneBuff() {
-  const stageRect = state.stageRect;
-  const skyMinY = 24;
-  const skyMaxY = Math.max(120, stageRect.height * 0.55);
-
-  const buff = safeBuffPool[Math.floor(Math.random() * safeBuffPool.length)];
-
-  const bird = {
-    id: `b-${buff.key}-${Date.now()}`,
-    type: "buff",
-    buffKey: buff.key,
-    badge: buff.badge,
-    hit: false,
-    x: 80 + Math.random() * (stageRect.width - 160),
-    baseY: skyMinY + Math.random() * (skyMaxY - skyMinY),
-    y: 0,
-    vx: (Math.random() > 0.5 ? 1 : -1) * (32 + Math.random() * 24),
-    vy: (Math.random() > 0.5 ? 1 : -1) * (6 + Math.random() * 12),
-    amp: 14 + Math.random() * 16,
-    phase: Math.random() * Math.PI * 2,
-    phaseSpeed: 1.1 + Math.random() * 1.3,
-    size: BUFF_BIRD_SIZE - Math.random() * 7,
-    facing: 1
-  };
-
-  buildBirdElement(bird);
-  state.birds.push(bird);
-}
-
-function ensureBuffCount() {
-  const currentBuffs = state.birds.filter(
-    b => b.type === "buff" && !b.hit
-  ).length;
-
-  const need = BUFF_BIRDS - currentBuffs;
-
-  for (let i = 0; i < need; i++) {
-    spawnOneBuff();
-  }
-}
