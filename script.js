@@ -5,8 +5,9 @@ const TOTAL_BIRDS = 12;
 const BUFF_BIRDS = 2; 
 const MAX_ARROW_SPEED = 920;
 const ARROW_GRAVITY = 420;
-// Tăng tỷ lệ hitbox từ 0.34 lên 0.45 để dễ trúng hơn
-const HIT_RADIUS_FACTOR = 0.45; 
+
+// Tăng tỷ lệ hitbox lên 0.6 để cảm giác bắn mượt và dễ trúng hơn
+const HIT_RADIUS_FACTOR = 0.6; 
 const QUESTION_BIRD_SIZE = 56;
 const BUFF_BIRD_SIZE = 52;
 
@@ -149,13 +150,6 @@ const safeBuffPool = [
     apply(state) { state.score += 5; }
   },
   {
-    key: "minus_five",
-    badge: "-5",
-    name: "-5 điểm",
-    message: "Ôi không, bị trừ 5 điểm!",
-    apply(state) { state.score = Math.max(0, state.score - 5); }
-  },
-  {
     key: "love",
     badge: "❤",
     name: "Tôi yêu Vật Lí",
@@ -177,14 +171,11 @@ const state = {
   answeredQuestions: new Set(),
   usedBuffs: new Set(),
   questionOrder: [],
-  questionQueue: [],
-  buffConfigs: [],
   isRunning: false,
   isPaused: false,
   isAiming: false,
   pointerX: 0,
   pointerY: 0,
-  pendingQuestionBirdId: null,
   lastTime: 0,
   arrowCooldownUntil: 0,
   stageRect: null,
@@ -192,11 +183,7 @@ const state = {
   rafId: 0
 };
 
-const screens = {
-  start: document.getElementById("startScreen"),
-  game: document.getElementById("gameScreen"),
-  result: document.getElementById("resultScreen")
-};
+// DOM Elements
 const stage = document.getElementById("stage");
 const birdsLayer = document.getElementById("birdsLayer");
 const arrowsLayer = document.getElementById("arrowsLayer");
@@ -232,8 +219,15 @@ const finalScore = document.getElementById("finalScore");
 const finalCorrect = document.getElementById("finalCorrect");
 const finalBuff = document.getElementById("finalBuff");
 
+const screens = {
+  start: document.getElementById("startScreen"),
+  game: document.getElementById("gameScreen"),
+  result: document.getElementById("resultScreen")
+};
+
 const optionLetters = ["A", "B", "C", "D"];
 
+// Logic Functions
 function shuffle(arr) {
   const clone = [...arr];
   for (let i = clone.length - 1; i > 0; i -= 1) {
@@ -291,14 +285,12 @@ function buildBirdElement(bird) {
   const el = document.createElement("div");
   el.className = `bird ${bird.type}`;
   el.style.setProperty("--bird-size", `${bird.size}px`);
-  el.dataset.badge = bird.type === "question" ? "?" : bird.badge;
   
   const imgWrap = document.createElement("div");
   imgWrap.className = "bird-img-wrap";
   
   const img = document.createElement("img");
   img.src = bird.type === "question" ? "images/bird-question.svg" : "images/bird-buff.svg";
-  img.alt = bird.type === "question" ? "Bird" : "Buff";
   
   imgWrap.appendChild(img);
   el.appendChild(imgWrap);
@@ -320,7 +312,6 @@ function createBirds() {
       id: `q-${orderIndex}`,
       type: "question",
       questionIndex,
-      orderIndex,
       hit: false,
       x: 80 + Math.random() * (stageRect.width - 160),
       baseY: skyMinY + Math.random() * (skyMaxY - skyMinY),
@@ -330,7 +321,7 @@ function createBirds() {
       amp: 10 + Math.random() * 18,
       phase: Math.random() * Math.PI * 2,
       phaseSpeed: 1.2 + Math.random() * 1.4,
-      size: QUESTION_BIRD_SIZE - Math.random() * 8,
+      size: QUESTION_BIRD_SIZE,
       facing: 1
     };
     buildBirdElement(bird);
@@ -344,10 +335,10 @@ function createBirds() {
   updateHud();
 }
 
-function spawnSingleBuff(buff, index = Date.now()) {
+function spawnSingleBuff(buff) {
   const stageRect = stage.getBoundingClientRect();
   const bird = {
-    id: `b-${buff.key}-${index}-${Math.random()}`,
+    id: `b-${Date.now()}-${Math.random()}`,
     type: "buff",
     buffKey: buff.key,
     badge: buff.badge,
@@ -360,160 +351,48 @@ function spawnSingleBuff(buff, index = Date.now()) {
     amp: 14 + Math.random() * 16,
     phase: Math.random() * Math.PI * 2,
     phaseSpeed: 1.1 + Math.random() * 1.3,
-    size: BUFF_BIRD_SIZE - Math.random() * 7,
+    size: BUFF_BIRD_SIZE,
     facing: 1
   };
   buildBirdElement(bird);
   state.birds.push(bird);
 }
 
-function resetGame() {
-  state.health = MAX_HEALTH;
-  state.score = 0;
-  state.correctCount = 0;
-  state.answeredCount = 0;
-  state.buffEaten = 0;
-  state.loveCount = 0;
-  state.nextCorrectMultiplier = 1;
-  state.answeredQuestions = new Set();
-  state.usedBuffs = new Set();
-  state.arrows = [];
-  state.isPaused = false;
-  state.isAiming = false;
-  state.pendingQuestionBirdId = null;
-  state.questionOpen = false;
-  state.lastTime = 0;
-  arrowsLayer.innerHTML = "";
-  questionFeedback.className = "question-feedback hidden";
-  closeModal(questionModal);
-  state.stageRect = stage.getBoundingClientRect();
-  createBirds();
-  setAimVisible(false);
+// FIX HITBOX: Sử dụng Raycasting (kiểm tra khoảng cách điểm đến đoạn thẳng)
+function distPointToSegment(px, py, x1, y1, x2, y2) {
+  const l2 = Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2);
+  if (l2 === 0) return Math.hypot(px - x1, py - y1);
+  let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
 }
 
-function setAimVisible(visible) {
-  aimOverlay.classList.toggle("show", visible);
-  loadedArrow.classList.toggle("hidden", !visible);
-  archerRig.classList.toggle("drawing", visible);
-}
+function checkArrowCollisions(arrow, delta) {
+  const headOffsetX = Math.cos(arrow.angle) * 60;
+  const headOffsetY = Math.sin(arrow.angle) * 60;
+  
+  const currentHeadX = arrow.x + headOffsetX;
+  const currentHeadY = arrow.y + headOffsetY;
+  const prevHeadX = (arrow.x - arrow.vx * delta) + headOffsetX;
+  const prevHeadY = (arrow.y - arrow.vy * delta) + headOffsetY;
 
-function updateAimVisual(pointerX, pointerY) {
-  const origin = getBowOrigin();
-  const angle = Math.atan2(pointerY - origin.y, pointerX - origin.x);
-  const distance = Math.min(170, Math.max(28, Math.hypot(pointerX - origin.x, pointerY - origin.y)));
-  const pull = Math.min(28, Math.max(6, distance * 0.18));
-  bowRig.style.transform = `rotate(${angle}rad)`;
-  bowString.style.transform = `translateX(${pull * 0.2}px) scaleY(1)`;
-  loadedArrow.style.transform = `translateY(-50%) translateX(${-pull}px)`;
+  for (const bird of state.birds) {
+    if (bird.hit) continue;
+    
+    const birdCx = bird.x + bird.size / 2;
+    const birdCy = bird.y + bird.size / 2;
+    const hitRadius = bird.size * HIT_RADIUS_FACTOR;
 
-  const rect = stage.getBoundingClientRect();
-  aimOverlay.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
-  aimLine.setAttribute("x1", origin.x);
-  aimLine.setAttribute("y1", origin.y);
-  aimLine.setAttribute("x2", pointerX);
-  aimLine.setAttribute("y2", pointerY);
-}
+    const distToSegment = distPointToSegment(birdCx, birdCy, prevHeadX, prevHeadY, currentHeadX, currentHeadY);
 
-function startGame() {
-  showScreen("game");
-  if (state.rafId) cancelAnimationFrame(state.rafId);
-  state.isRunning = true;
-  resizeStage();
-  resetGame();
-  state.rafId = requestAnimationFrame(loop);
-}
-
-function createArrow(targetX, targetY) {
-  const now = performance.now();
-  if (now < state.arrowCooldownUntil) return;
-  state.arrowCooldownUntil = now + 260;
-
-  const origin = getBowOrigin();
-  const dx = targetX - origin.x;
-  const dy = targetY - origin.y;
-  const distance = Math.max(20, Math.min(220, Math.hypot(dx, dy)));
-  const angle = Math.atan2(dy, dx);
-  const speed = Math.min(MAX_ARROW_SPEED, 460 + distance * 2.2);
-
-  const arrow = {
-    id: `arrow-${now}`,
-    x: origin.x,
-    y: origin.y,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
-    angle,
-    active: true,
-    width: 68,
-    height: 12
-  };
-  const el = document.createElement("div");
-  el.className = "arrow";
-  el.innerHTML = '<img src="images/arrow.svg" alt="Arrow" />';
-  arrowsLayer.appendChild(el);
-  arrow.el = el;
-  state.arrows.push(arrow);
-  archerRig.classList.remove("drawing");
-  archerRig.classList.add("release");
-  setTimeout(() => archerRig.classList.remove("release"), 180);
-}
-
-function handlePointerDown(event) {
-  if (!state.isRunning || state.isPaused || state.questionOpen) return;
-  const rect = stage.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  if (y > rect.height * 0.84) return;
-  state.isAiming = true;
-  state.pointerX = x;
-  state.pointerY = y;
-  setAimVisible(true);
-  updateAimVisual(x, y);
-}
-
-function handlePointerMove(event) {
-  if (!state.isAiming || state.isPaused || state.questionOpen) return;
-  const rect = stage.getBoundingClientRect();
-  state.pointerX = event.clientX - rect.left;
-  state.pointerY = event.clientY - rect.top;
-  updateAimVisual(state.pointerX, state.pointerY);
-}
-
-function handlePointerUp(event) {
-  if (!state.isAiming) return;
-  const rect = stage.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  state.isAiming = false;
-  setAimVisible(false);
-  createArrow(x, y);
-}
-
-function updateBirds(delta, timeSeconds) {
-  const rect = state.stageRect;
-  const minX = 12;
-  const maxX = rect.width - 12;
-  const minY = 18;
-  const maxY = rect.height * 0.58;
-
-  state.birds.forEach((bird) => {
-    if (bird.hit) return;
-    bird.x += bird.vx * delta;
-    bird.baseY += bird.vy * delta;
-
-    if (bird.x < minX) { bird.x = minX; bird.vx *= -1; }
-    if (bird.x > maxX - bird.size) { bird.x = maxX - bird.size; bird.vx *= -1; }
-    if (bird.baseY < minY) { bird.baseY = minY; bird.vy *= -1; }
-    if (bird.baseY > maxY - bird.size) { bird.baseY = maxY - bird.size; bird.vy *= -1; }
-
-    bird.y = bird.baseY + Math.sin(timeSeconds * bird.phaseSpeed + bird.phase) * bird.amp;
-    bird.facing = bird.vx >= 0 ? 1 : -1;
-    const wingTilt = Math.sin(timeSeconds * 7 + bird.phase) * 4;
-
-    bird.el.style.transform = `translate(${bird.x}px, ${bird.y}px)`;
-    if (bird.imgWrap) {
-        bird.imgWrap.style.transform = `scaleX(${bird.facing}) rotate(${wingTilt}deg)`;
+    if (distToSegment <= hitRadius) {
+      arrow.active = false;
+      arrow.el.remove();
+      hitBird(bird);
+      return true;
     }
-  });
+  }
+  return false;
 }
 
 function hitBird(bird) {
@@ -522,7 +401,6 @@ function hitBird(bird) {
   setTimeout(() => bird.el?.remove(), 180);
 
   if (bird.type === "question") {
-    state.pendingQuestionBirdId = bird.id;
     openQuestion(bird.questionIndex);
   } else {
     state.buffEaten += 1;
@@ -535,38 +413,6 @@ function hitBird(bird) {
   }
 }
 
-// FIX HITBOX: Kiểm tra va chạm bằng Box (Hình chữ nhật) thay vì chỉ một điểm Circle
-function checkArrowCollisions(arrow) {
-  for (const bird of state.birds) {
-    if (bird.hit) continue;
-    
-    // Tọa độ tâm chim
-    const birdCx = bird.x + bird.size / 2;
-    const birdCy = bird.y + bird.size / 2;
-    
-    // Tọa độ đầu mũi tên (điểm va chạm thực tế)
-    // Offset x: 60 (đầu mũi tên dài 68px), y: 6 (giữa mũi tên dày 12px)
-    const arrowHeadX = arrow.x + Math.cos(arrow.angle) * 60;
-    const arrowHeadY = arrow.y + Math.sin(arrow.angle) * 60;
-
-    // Khoảng cách từ đầu mũi tên đến tâm chim
-    const dx = arrowHeadX - birdCx;
-    const dy = arrowHeadY - birdCy;
-    const distance = Math.hypot(dx, dy);
-
-    // Bán kính va chạm linh hoạt
-    const hitRadius = bird.size * HIT_RADIUS_FACTOR;
-
-    if (distance <= hitRadius) {
-      arrow.active = false;
-      arrow.el.remove();
-      hitBird(bird);
-      return true;
-    }
-  }
-  return false;
-}
-
 function updateArrows(delta) {
   const rect = state.stageRect;
   state.arrows.forEach((arrow) => {
@@ -577,9 +423,9 @@ function updateArrows(delta) {
     arrow.angle = Math.atan2(arrow.vy, arrow.vx);
     arrow.el.style.transform = `translate(${arrow.x}px, ${arrow.y}px) rotate(${arrow.angle}rad)`;
 
-    if (checkArrowCollisions(arrow)) return;
+    if (checkArrowCollisions(arrow, delta)) return;
 
-    if (arrow.x > rect.width + 90 || arrow.y > rect.height + 50 || arrow.x < -90 || arrow.y < -50) {
+    if (arrow.x > rect.width + 100 || arrow.y > rect.height + 100 || arrow.x < -100 || arrow.y < -100) {
       arrow.active = false;
       arrow.el.remove();
     }
@@ -587,16 +433,56 @@ function updateArrows(delta) {
   state.arrows = state.arrows.filter(arrow => arrow.active);
 }
 
+function updateBirds(delta, timeSeconds) {
+  const rect = state.stageRect;
+  state.birds.forEach((bird) => {
+    if (bird.hit) return;
+    bird.x += bird.vx * delta;
+    bird.baseY += bird.vy * delta;
+
+    if (bird.x < 10) { bird.x = 10; bird.vx *= -1; }
+    if (bird.x > rect.width - bird.size - 10) { bird.x = rect.width - bird.size - 10; bird.vx *= -1; }
+    if (bird.baseY < 20) { bird.baseY = 20; bird.vy *= -1; }
+    if (bird.baseY > rect.height * 0.55) { bird.baseY = rect.height * 0.55; bird.vy *= -1; }
+
+    bird.y = bird.baseY + Math.sin(timeSeconds * bird.phaseSpeed + bird.phase) * bird.amp;
+    bird.facing = bird.vx >= 0 ? 1 : -1;
+    bird.el.style.transform = `translate(${bird.x}px, ${bird.y}px)`;
+    bird.imgWrap.style.transform = `scaleX(${bird.facing})`;
+  });
+}
+
 function loop(timestamp) {
   if (!state.isRunning) return;
   if (!state.lastTime) state.lastTime = timestamp;
   const delta = Math.min(0.032, (timestamp - state.lastTime) / 1000);
   state.lastTime = timestamp;
+
   if (!state.isPaused) {
-    const timeSeconds = timestamp / 1000;
-    updateBirds(delta, timeSeconds);
+    updateBirds(delta, timestamp / 1000);
     updateArrows(delta);
   }
+  state.rafId = requestAnimationFrame(loop);
+}
+
+// Event Handlers & Game Control
+function startGame() {
+  showScreen("game");
+  state.isRunning = true;
+  state.health = MAX_HEALTH;
+  state.score = 0;
+  state.correctCount = 0;
+  state.answeredCount = 0;
+  state.buffEaten = 0;
+  state.answeredQuestions.clear();
+  state.arrows = [];
+  state.isPaused = false;
+  state.questionOpen = false;
+  state.lastTime = 0;
+  arrowsLayer.innerHTML = "";
+  resizeStage();
+  createBirds();
+  if (state.rafId) cancelAnimationFrame(state.rafId);
   state.rafId = requestAnimationFrame(loop);
 }
 
@@ -604,141 +490,139 @@ function openQuestion(questionIndex) {
   state.isPaused = true;
   state.questionOpen = true;
   const q = questions[questionIndex];
-  const displayNumber = state.answeredCount + 1;
   questionMeta.textContent = `${q.level} · ${q.topic}`;
-  questionTitle.textContent = `Câu ${displayNumber}`;
+  questionTitle.textContent = `Câu ${state.answeredCount + 1}`;
   questionText.textContent = q.question;
+  
   if (q.image) {
     questionImage.src = q.image;
     questionImageWrap.classList.remove("hidden");
   } else {
     questionImageWrap.classList.add("hidden");
   }
+
   answersWrap.innerHTML = "";
   questionFeedback.className = "question-feedback hidden";
 
   q.options.forEach((option, index) => {
     const button = document.createElement("button");
     button.className = "answer-btn";
-    button.type = "button";
     button.innerHTML = `<span class="letter">${optionLetters[index]}</span>${option}`;
-    button.addEventListener("click", () => answerQuestion(questionIndex, index));
+    button.onclick = () => {
+      if (questionFeedback.classList.contains("hidden")) {
+        const isCorrect = index === q.answer;
+        const btns = answersWrap.querySelectorAll(".answer-btn");
+        btns.forEach((b, i) => {
+          b.disabled = true;
+          if (i === q.answer) b.classList.add("correct");
+          else if (i === index) b.classList.add("wrong");
+        });
+
+        if (isCorrect) {
+          state.score += POINTS_PER_CORRECT * state.nextCorrectMultiplier;
+          state.correctCount++;
+          state.nextCorrectMultiplier = 1;
+          feedbackTitle.textContent = "✅ Chính xác!";
+          questionFeedback.className = "question-feedback success";
+        } else {
+          state.health--;
+          feedbackTitle.textContent = "❌ Sai rồi";
+          questionFeedback.className = "question-feedback failure";
+        }
+        feedbackText.textContent = q.explanation;
+        questionFeedback.classList.remove("hidden");
+        state.answeredQuestions.add(questionIndex);
+        state.answeredCount = state.answeredQuestions.size;
+        updateHud();
+      }
+    };
     answersWrap.appendChild(button);
   });
   openModal(questionModal);
 }
 
-function answerQuestion(questionIndex, selectedIndex) {
-  const q = questions[questionIndex];
-  const isCorrect = selectedIndex === q.answer;
-  const buttons = [...answersWrap.querySelectorAll(".answer-btn")];
-  buttons.forEach((btn, index) => {
-    btn.disabled = true;
-    if (index === q.answer) btn.classList.add("correct");
-    else if (index === selectedIndex && !isCorrect) btn.classList.add("wrong");
-    else btn.classList.add("locked");
-  });
-
-  if (isCorrect) {
-    const gained = POINTS_PER_CORRECT * state.nextCorrectMultiplier;
-    state.score += gained;
-    state.correctCount += 1;
-    feedbackTitle.textContent = `✅ Đúng rồi! +${gained} điểm`;
-    feedbackText.textContent = q.explanation;
-    questionFeedback.className = "question-feedback success";
-    state.nextCorrectMultiplier = 1;
-  } else {
-    state.health = Math.max(0, state.health - 1);
-    feedbackTitle.textContent = "❌ Chưa đúng";
-    feedbackText.textContent = `${q.explanation} Đáp án đúng là ${optionLetters[q.answer]}.`;
-    questionFeedback.className = "question-feedback failure";
-  }
-
-  if (!state.answeredQuestions.has(questionIndex)) {
-    state.answeredQuestions.add(questionIndex);
-  }
-  state.answeredCount = state.answeredQuestions.size;
-  updateHud();
-  questionFeedback.classList.remove("hidden");
-}
-
-function continueAfterQuestion() {
+continueBtn.onclick = () => {
   closeModal(questionModal);
   state.questionOpen = false;
-  state.lastTime = 0;
   state.isPaused = false;
-  state.pendingQuestionBirdId = null;
+  if (state.health <= 0) finishGame(false);
+  else if (state.answeredCount >= questions.length) finishGame(true);
+};
 
-  const currentBuffs = state.birds.filter(b => b.type === "buff" && !b.hit).length;
-  const needToSpawn = BUFF_BIRDS - currentBuffs;
-  for(let i=0; i < needToSpawn; i++) {
-    const randomBuff = safeBuffPool[Math.floor(Math.random() * safeBuffPool.length)];
-    spawnSingleBuff(randomBuff);
-  }
-
-  if (state.health <= 0) { finishGame(false); return; }
-  if (state.answeredCount >= questions.length) { finishGame(true); return; }
-  updateHud();
-}
-
-function finishGame(success) {
+function finishGame(win) {
   state.isRunning = false;
-  state.isPaused = true;
   showScreen("result");
-  finalScore.textContent = String(state.score);
+  resultTitle.textContent = win ? "Chiến thắng!" : "Thất bại";
+  finalScore.textContent = state.score;
   finalCorrect.textContent = `${state.correctCount}/${questions.length}`;
-  finalBuff.textContent = `${state.buffEaten}`;
-  if (state.rafId) cancelAnimationFrame(state.rafId);
-  state.rafId = 0;
-  if (success) {
-    resultTitle.textContent = "Chiến thắng!";
-    resultDesc.textContent = `Tuyệt vời! Bạn đã hoàn thành bài tập với kết quả xuất sắc.`;
-  } else {
-    resultTitle.textContent = "Thất bại";
-    resultDesc.textContent = `Bạn đã hết lượt chơi. Hãy thử lại để đạt điểm cao hơn nhé!`;
-  }
+  finalBuff.textContent = state.buffEaten;
 }
 
 function resizeStage() {
-  if (!stage) return;
   state.stageRect = stage.getBoundingClientRect();
 }
 
-stage.addEventListener("pointerdown", (event) => {
-  stage.setPointerCapture?.(event.pointerId);
-  handlePointerDown(event);
-});
-stage.addEventListener("pointermove", handlePointerMove);
-stage.addEventListener("pointerup", (event) => {
-  stage.releasePointerCapture?.(event.pointerId);
-  handlePointerUp(event);
-});
-stage.addEventListener("pointercancel", (event) => {
+// Input Handling
+stage.onpointerdown = (e) => {
+  if (state.isPaused || state.questionOpen) return;
+  state.isAiming = true;
+  setAimVisible(true);
+  updateAimVisual(e.clientX - state.stageRect.left, e.clientY - state.stageRect.top);
+};
+
+stage.onpointermove = (e) => {
+  if (!state.isAiming) return;
+  updateAimVisual(e.clientX - state.stageRect.left, e.clientY - state.stageRect.top);
+};
+
+stage.onpointerup = (e) => {
+  if (!state.isAiming) return;
   state.isAiming = false;
   setAimVisible(false);
-  stage.releasePointerCapture?.(event.pointerId);
-});
+  const now = performance.now();
+  if (now > state.arrowCooldownUntil) {
+    const origin = getBowOrigin();
+    const dx = (e.clientX - state.stageRect.left) - origin.x;
+    const dy = (e.clientY - state.stageRect.top) - origin.y;
+    const angle = Math.atan2(dy, dx);
+    const dist = Math.min(220, Math.hypot(dx, dy));
+    const speed = 460 + dist * 2.2;
 
-document.getElementById("startNowBtn").addEventListener("click", startGame);
-document.getElementById("showGuideBtn").addEventListener("click", () => openModal(guideModal));
-document.getElementById("guideInGameBtn").addEventListener("click", () => openModal(guideModal));
-document.getElementById("guideStartBtn").addEventListener("click", () => { closeModal(guideModal); startGame(); });
-document.getElementById("closeGuideBtn").addEventListener("click", () => closeModal(guideModal));
-document.getElementById("guideCloseTextBtn").addEventListener("click", () => closeModal(guideModal));
-document.getElementById("restartInGameBtn").addEventListener("click", startGame);
-document.getElementById("playAgainBtn").addEventListener("click", startGame);
-document.getElementById("backHomeBtn").addEventListener("click", () => {
-  state.isRunning = false; state.isPaused = true;
-  if (state.rafId) cancelAnimationFrame(state.rafId);
-  state.rafId = 0;
-  closeModal(questionModal); closeModal(guideModal);
-  showScreen("start");
-});
-continueBtn.addEventListener("click", continueAfterQuestion);
+    const arrow = {
+      x: origin.x, y: origin.y,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      angle, active: true
+    };
+    const el = document.createElement("div");
+    el.className = "arrow";
+    el.innerHTML = '<img src="images/arrow.svg">';
+    arrowsLayer.appendChild(el);
+    arrow.el = el;
+    state.arrows.push(arrow);
+    state.arrowCooldownUntil = now + 250;
+  }
+};
 
-guideModal.addEventListener("click", (event) => { if (event.target === guideModal) closeModal(guideModal); });
-window.addEventListener("resize", resizeStage);
-window.addEventListener("orientationchange", resizeStage);
+function setAimVisible(v) {
+  aimOverlay.classList.toggle("show", v);
+  loadedArrow.classList.toggle("hidden", !v);
+  archerRig.classList.toggle("drawing", v);
+}
+
+function updateAimVisual(px, py) {
+  const origin = getBowOrigin();
+  const angle = Math.atan2(py - origin.y, px - origin.x);
+  bowRig.style.transform = `rotate(${angle}rad)`;
+  aimLine.setAttribute("x1", origin.x); aimLine.setAttribute("y1", origin.y);
+  aimLine.setAttribute("x2", px); aimLine.setAttribute("y2", py);
+}
+
+document.getElementById("startNowBtn").onclick = startGame;
+document.getElementById("showGuideBtn").onclick = () => openModal(guideModal);
+document.getElementById("guideStartBtn").onclick = () => { closeModal(guideModal); startGame(); };
+document.getElementById("restartInGameBtn").onclick = startGame;
+document.getElementById("playAgainBtn").onclick = startGame;
+document.getElementById("backHomeBtn").onclick = () => showScreen("start");
+window.onresize = resizeStage;
 
 showScreen("start");
-
