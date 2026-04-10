@@ -1,160 +1,160 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Cung thủ giữa đồng cỏ</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cung thủ giữa đồng cỏ</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <section id="startScreen" class="screen active">
-      <div class="start-card glass">
-        <div class="hero-top">
-          <img src="images/archer.svg" alt="Cung thủ" class="hero-archer" />
-          <div>
-            <span class="eyebrow">Bản demo mobile</span>
-            <h1>Cung thủ giữa đồng cỏ</h1>
-            <p class="lead">Giữ và kéo để ngắm, thả tay để bắn. Trúng chim câu hỏi thì mở câu trắc nghiệm, trúng chim buff thì nhận hiệu ứng bất ngờ.</p>
-          </div>
-        </div>
+  <div class="app-shell">
+    <section id="startScreen" class="screen active">
+      <div class="start-card glass">
+        <div class="hero-top">
+          <img src="images/archer.svg" alt="Cung thủ" class="hero-archer" />
+          <div>
+            <span class="eyebrow">Bản demo mobile</span>
+            <h1>Cung thủ giữa đồng cỏ</h1>
+            <p class="lead">Giữ và kéo để ngắm, thả tay để bắn. Trúng chim câu hỏi thì mở câu trắc nghiệm, trúng chim buff thì nhận hiệu ứng bất ngờ.</p>
+          </div>
+        </div>
 
-        <div class="start-stats">
-          <div class="stat-pill">10 câu hỏi</div>
-          <div class="stat-pill">12 chim tổng cộng</div>
-          <div class="stat-pill">2 chim buff ngẫu nhiên</div>
-          <div class="stat-pill">Có thể bắn hụt</div>
-        </div>
+        <div class="start-stats">
+          <div class="stat-pill">10 câu hỏi</div>
+          <div class="stat-pill">12 chim tổng cộng</div>
+          <div class="stat-pill">2 chim buff ngẫu nhiên</div>
+          <div class="stat-pill">Có thể bắn hụt</div>
+        </div>
 
-        <div class="start-actions">
-          <button id="startNowBtn" class="btn btn-primary" type="button">Bắt đầu ngay</button>
-          <button id="showGuideBtn" class="btn btn-secondary" type="button">Xem hướng dẫn</button>
-        </div>
-      </div>
-    </section>
+        <div class="start-actions">
+          <button id="startNowBtn" class="btn btn-primary" type="button">Bắt đầu ngay</button>
+          <button id="showGuideBtn" class="btn btn-secondary" type="button">Xem hướng dẫn</button>
+        </div>
+      </div>
+    </section>
 
-    <section id="gameScreen" class="screen">
-      <header class="hud glass">
-        <div class="hud-group">
-          <div class="hud-box">
-            <span class="hud-label">Máu</span>
-            <div id="hearts" class="hearts"></div>
-          </div>
-          <div class="hud-box">
-            <span class="hud-label">Điểm</span>
-            <strong id="scoreText">0</strong>
-          </div>
-        </div>
+    <section id="gameScreen" class="screen">
+      <header class="hud glass">
+        <div class="hud-group">
+          <div class="hud-box">
+            <span class="hud-label">Máu</span>
+            <div id="hearts" class="hearts"></div>
+          </div>
+          <div class="hud-box">
+            <span class="hud-label">Điểm</span>
+            <strong id="scoreText">0</strong>
+          </div>
+        </div>
 
-        <div class="hud-group hud-mid">
-          <div class="hud-box wide">
-            <span class="hud-label">Tiến trình</span>
-            <div class="progress-head">
-              <span id="answeredText">0/10 câu</span>
-              <span id="buffText">2 buff còn lại</span>
-            </div>
-            <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
-          </div>
-        </div>
+        <div class="hud-group hud-mid">
+          <div class="hud-box wide">
+            <span class="hud-label">Tiến trình</span>
+            <div class="progress-head">
+              <span id="answeredText">0/10 câu</span>
+              <span id="buffText">2 buff còn lại</span>
+            </div>
+            <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+          </div>
+        </div>
 
-        <div class="hud-group hud-actions">
-          <button id="guideInGameBtn" class="icon-btn" type="button" aria-label="Xem hướng dẫn">?</button>
-          <button id="restartInGameBtn" class="icon-btn" type="button" aria-label="Chơi lại">↺</button>
-        </div>
-      </header>
+        <div class="hud-group hud-actions">
+          <button id="guideInGameBtn" class="icon-btn" type="button" aria-label="Xem hướng dẫn">?</button>
+          <button id="restartInGameBtn" class="icon-btn" type="button" aria-label="Chơi lại">↺</button>
+        </div>
+      </header>
 
-      <main id="stage" class="stage">
-        <div class="sky-gradient"></div>
-        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-1" />
-        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-2" />
-        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-3" />
+      <main id="stage" class="stage">
+        <div class="sky-gradient"></div>
+        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-1" />
+        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-2" />
+        <img src="images/cloud.svg" alt="Mây" class="cloud cloud-3" />
 
-        <div id="birdsLayer" class="birds-layer"></div>
-        <div id="arrowsLayer" class="arrows-layer"></div>
-        <svg id="aimOverlay" class="aim-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <line id="aimLine" x1="0" y1="0" x2="0" y2="0" />
-        </svg>
-        <div id="toast" class="toast hidden"></div>
+        <div id="birdsLayer" class="birds-layer"></div>
+        <div id="arrowsLayer" class="arrows-layer"></div>
+        <svg id="aimOverlay" class="aim-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line id="aimLine" x1="0" y1="0" x2="0" y2="0" />
+        </svg>
+        <div id="toast" class="toast hidden"></div>
 
-        <div class="bottom-world">
-          <img src="images/grass.svg" alt="Đồng cỏ" class="grass" />
-          <div id="archerRig" class="archer-rig">
-            <div id="bowRig" class="bow-rig">
-              <div id="bowString" class="bow-string"></div>
-              <div id="loadedArrow" class="loaded-arrow hidden"><img src="images/arrow.svg" alt="Mũi tên" /></div>
-            </div>
-            <img src="images/archer.svg" alt="Cung thủ" class="archer-img" />
-          </div>
-          <div class="hint-box glass">Giữ và kéo trên bầu trời để ngắm • Thả tay để bắn</div>
-        </div>
-      </main>
-    </section>
+        <div class="bottom-world">
+          <img src="images/grass.svg" alt="Đồng cỏ" class="grass" />
+          <div id="archerRig" class="archer-rig">
+            <div id="bowRig" class="bow-rig">
+              <div id="bowString" class="bow-string"></div>
+              <div id="loadedArrow" class="loaded-arrow hidden"><img src="images/arrow.svg" alt="Mũi tên" /></div>
+            </div>
+            <img src="images/archer.svg" alt="Cung thủ" class="archer-img" />
+          </div>
+          <div class="hint-box glass">Giữ và kéo trên bầu trời để ngắm • Thả tay để bắn</div>
+        </div>
+      </main>
+    </section>
 
-    <section id="resultScreen" class="screen">
-      <div class="result-card glass">
-        <span class="eyebrow">Kết thúc lượt chơi</span>
-        <h2 id="resultTitle">Kết quả</h2>
-        <p id="resultDesc" class="lead small"></p>
-        <div class="result-grid">
-          <div class="result-box"><span>Điểm</span><strong id="finalScore">0</strong></div>
-          <div class="result-box"><span>Câu đúng</span><strong id="finalCorrect">0/10</strong></div>
-          <div class="result-box"><span>Buff ăn được</span><strong id="finalBuff">0</strong></div>
-        </div>
-        <div class="start-actions">
-          <button id="playAgainBtn" class="btn btn-primary" type="button">Chơi lại</button>
-          <button id="backHomeBtn" class="btn btn-secondary" type="button">Về màn đầu</button>
-        </div>
-      </div>
-    </section>
-  </div>
+    <section id="resultScreen" class="screen">
+      <div class="result-card glass">
+        <span class="eyebrow">Kết thúc lượt chơi</span>
+        <h2 id="resultTitle">Kết quả</h2>
+        <p id="resultDesc" class="lead small"></p>
+        <div class="result-grid">
+          <div class="result-box"><span>Điểm</span><strong id="finalScore">0</strong></div>
+          <div class="result-box"><span>Câu đúng</span><strong id="finalCorrect">0/10</strong></div>
+          <div class="result-box"><span>Buff ăn được</span><strong id="finalBuff">0</strong></div>
+        </div>
+        <div class="start-actions">
+          <button id="playAgainBtn" class="btn btn-primary" type="button">Chơi lại</button>
+          <button id="backHomeBtn" class="btn btn-secondary" type="button">Về màn đầu</button>
+        </div>
+      </div>
+    </section>
+  </div>
 
-  <div id="guideModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-    <div class="modal-card glass compact">
-      <div class="modal-top">
-        <div>
-          <span class="eyebrow">Hướng dẫn</span>
-          <h2 id="guideTitle">Cách chơi nhanh</h2>
-        </div>
-        <button id="closeGuideBtn" class="icon-btn" type="button">×</button>
-      </div>
-      <div class="guide-list">
-        <div class="guide-item"><span>1</span><p>Giữ ngón tay trên vùng trời để <strong>giương cung</strong>.</p></div>
-        <div class="guide-item"><span>2</span><p>Kéo theo hướng muốn bắn, rồi <strong>thả tay</strong> để bắn mũi tên.</p></div>
-        <div class="guide-item"><span>3</span><p>Bắn trúng chim câu hỏi sẽ mở 1 câu trắc nghiệm. Trả lời sai thì mất 1 máu.</p></div>
-        <div class="guide-item"><span>4</span><p>Game có 10 chim câu hỏi và 2 chim buff. Mũi tên có thể <strong>bắn hụt</strong>.</p></div>
-      </div>
-      <div class="start-actions modal-actions">
-        <button id="guideStartBtn" class="btn btn-primary" type="button">Bắt đầu trò chơi</button>
-        <button id="guideCloseTextBtn" class="btn btn-secondary" type="button">Đóng hướng dẫn</button>
-      </div>
-    </div>
-  </div>
+  <div id="guideModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal-card glass compact">
+      <div class="modal-top">
+        <div>
+          <span class="eyebrow">Hướng dẫn</span>
+          <h2 id="guideTitle">Cách chơi nhanh</h2>
+        </div>
+        <button id="closeGuideBtn" class="icon-btn" type="button">×</button>
+      </div>
+      <div class="guide-list">
+        <div class="guide-item"><span>1</span><p>Giữ ngón tay trên vùng trời để <strong>giương cung</strong>.</p></div>
+        <div class="guide-item"><span>2</span><p>Kéo theo hướng muốn bắn, rồi <strong>thả tay</strong> để bắn mũi tên.</p></div>
+        <div class="guide-item"><span>3</span><p>Bắn trúng chim câu hỏi sẽ mở 1 câu trắc nghiệm. Trả lời sai thì mất 1 máu.</p></div>
+        <div class="guide-item"><span>4</span><p>Game có 10 chim câu hỏi và 2 chim buff. Mũi tên có thể <strong>bắn hụt</strong>.</p></div>
+      </div>
+      <div class="start-actions modal-actions">
+        <button id="guideStartBtn" class="btn btn-primary" type="button">Bắt đầu trò chơi</button>
+        <button id="guideCloseTextBtn" class="btn btn-secondary" type="button">Đóng hướng dẫn</button>
+      </div>
+    </div>
+  </div>
 
-  <div id="questionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="questionTitle">
-    <div class="modal-card glass question-card">
-      <div class="modal-top">
-        <div>
-          <span id="questionMeta" class="eyebrow">Câu hỏi</span>
-          <h2 id="questionTitle">Câu hỏi</h2>
-        </div>
-      </div>
-      <div class="question-layout">
-        <div id="questionImageWrap" class="question-image-wrap">
-          <img id="questionImage" src="" alt="Ảnh minh họa" />
-        </div>
-        <div>
-          <p id="questionText" class="question-text"></p>
-          <div id="answersWrap" class="answers-wrap"></div>
-          <div id="questionFeedback" class="question-feedback hidden">
-            <h3 id="feedbackTitle"></h3>
-            <p id="feedbackText"></p>
-            <button id="continueBtn" class="btn btn-primary full" type="button">Tiếp tục</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="questionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="questionTitle">
+    <div class="modal-card glass question-card">
+      <div class="modal-top">
+        <div>
+          <span id="questionMeta" class="eyebrow">Câu hỏi</span>
+          <h2 id="questionTitle">Câu hỏi</h2>
+        </div>
+      </div>
+      <div class="question-layout">
+        <div id="questionImageWrap" class="question-image-wrap">
+          <img id="questionImage" src="" alt="Ảnh minh họa" />
+        </div>
+        <div>
+          <p id="questionText" class="question-text"></p>
+          <div id="answersWrap" class="answers-wrap"></div>
+          <div id="questionFeedback" class="question-feedback hidden">
+            <h3 id="feedbackTitle"></h3>
+            <p id="feedbackText"></p>
+            <button id="continueBtn" class="btn btn-primary full" type="button">Tiếp tục</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
